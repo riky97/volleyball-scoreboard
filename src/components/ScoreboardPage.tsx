@@ -7,6 +7,7 @@ import { SettingsModal } from "./SettingsModal";
 import { TeamPanel } from "./TeamPanel";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { confirm } from "@tauri-apps/plugin-dialog";
+import { isTauri } from "@tauri-apps/api/core";
 
 function isEditableTarget(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) return false;
@@ -74,6 +75,8 @@ export function ScoreboardPage() {
     }, []);
 
     useEffect(() => {
+        if (!isTauri()) return;
+
         const appWindow = getCurrentWindow();
 
         let unlisten: null | (() => void) = null;
@@ -108,8 +111,17 @@ export function ScoreboardPage() {
         };
     }, []);
 
-    function confirmAndDispatch(action: MatchAction, message: string) {
-        if (!window.confirm(message)) return;
+    async function confirmAndDispatch(action: MatchAction, message: string) {
+        const ok = isTauri()
+            ? await confirm(message, {
+                  title: "Conferma",
+                  kind: "warning",
+                  okLabel: "Conferma",
+                  cancelLabel: "Annulla",
+              })
+            : window.confirm(message);
+
+        if (!ok) return;
         dispatch(action);
     }
 
@@ -144,8 +156,17 @@ export function ScoreboardPage() {
                     </button>
                     <button
                         className="btn btn--danger"
-                        onClick={() => {
-                            if (!window.confirm("Vuoi iniziare una nuova partita?")) return;
+                        onClick={async () => {
+                            const ok = isTauri()
+                                ? await confirm("Vuoi iniziare una nuova partita?", {
+                                      title: "Conferma",
+                                      kind: "warning",
+                                      okLabel: "Nuova partita",
+                                      cancelLabel: "Annulla",
+                                  })
+                                : window.confirm("Vuoi iniziare una nuova partita?");
+
+                            if (!ok) return;
                             clearMatchState();
                             dispatch({ type: "match.reset" });
                         }}
@@ -185,7 +206,7 @@ export function ScoreboardPage() {
                         </button>
                         <button
                             className="btn btn--ghost"
-                            onClick={() => confirmAndDispatch({ type: "set.reset_current" }, "Vuoi azzerare il set corrente?")}
+                            onClick={() => void confirmAndDispatch({ type: "set.reset_current" }, "Vuoi azzerare il set corrente?")}
                         >
                             Azzeramento set
                         </button>
@@ -257,6 +278,20 @@ export function ScoreboardPage() {
                     </div>
                 </div>
             </section>
+
+            <footer className="statusBar" aria-label="Barra di stato">
+                <div className="statusBar__left">
+                    <span>{formatStatusLabel(match.status)}</span>
+                    <span>•</span>
+                    <span>
+                        Set {match.currentSet} — Obiettivo {pointsTarget}
+                        {isTiebreak ? " (Tie-break)" : ""}
+                    </span>
+                </div>
+                <div className="statusBar__right">
+                    <span>Scorciatoie: Q/A Casa • P/L Ospite • W/O Timeout • 1/2 Servizio • U Annulla</span>
+                </div>
+            </footer>
 
             <SettingsModal
                 open={settingsOpen}
