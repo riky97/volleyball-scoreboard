@@ -6,8 +6,9 @@ import { SetIndicator } from "./SetIndicator";
 import { SettingsModal } from "./SettingsModal";
 import { TeamPanel } from "./TeamPanel";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { confirm } from "@tauri-apps/plugin-dialog";
-import { isTauri } from "@tauri-apps/api/core";
+import { confirm, message, save } from "@tauri-apps/plugin-dialog";
+import { invoke, isTauri } from "@tauri-apps/api/core";
+import { buildMatchReportCsv } from "../utils/matchReportCsv";
 
 function isEditableTarget(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) return false;
@@ -27,6 +28,7 @@ export function ScoreboardPage() {
     const match = state.present;
 
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
     const pointsTarget = useMemo(() => getPointsTargetForSet(match.rules, match.currentSet), [match.currentSet, match.rules]);
 
@@ -129,6 +131,85 @@ export function ScoreboardPage() {
         dispatch({ type: "set.award", winner: team });
     }
 
+    function buildDefaultCsvFileName(): string {
+        const safe = (s: string) =>
+            s
+                .trim()
+                .replace(/\s+/g, "_")
+                .replace(/[^a-zA-Z0-9_\-]+/g, "")
+                .slice(0, 40) || "team";
+        const date = new Date();
+        const yyyy = String(date.getFullYear());
+        const mm = String(date.getMonth() + 1).padStart(2, "0");
+        const dd = String(date.getDate()).padStart(2, "0");
+        return `report_${safe(match.home.name)}_vs_${safe(match.away.name)}_${yyyy}-${mm}-${dd}.csv`;
+    }
+
+    async function exportCsvReport() {
+        if (match.status !== "finished") return;
+        if (isExporting) return;
+
+        setIsExporting(true);
+        try {
+            const csv = buildMatchReportCsv(match);
+
+            if (isTauri()) {
+                const selected = await save({
+                    title: "Salva report CSV",
+                    defaultPath: buildDefaultCsvFileName(),
+                    filters: [{ name: "CSV", extensions: ["csv"] }],
+                });
+
+                if (!selected) return;
+
+                const path = selected.toLowerCase().endsWith(".csv") ? selected : `${selected}.csv`;
+                await invoke("write_text_file", { path, contents: csv });
+                await message("Report salvato correttamente.", { title: "Esportazione CSV", kind: "info" });
+                return;
+            }
+
+            // Browser fallback (preview / web build)
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = buildDefaultCsvFileName();
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            const text = e instanceof Error ? e.message : String(e);
+            if (isTauri()) {
+                await message(`Errore durante il salvataggio: ${text}`, { title: "Esportazione CSV", kind: "error" });
+            } else {
+                window.alert(`Errore durante il salvataggio: ${text}`);
+            }
+        } finally {
+            setIsExporting(false);
+        }
+    }
+
+    function ExportIcon(props: { size?: number; className?: string }) {
+        const size = props.size ?? 16;
+        return (
+            <svg
+                className={props.className}
+                width={size}
+                height={size}
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+                style={{ marginRight: 8, verticalAlign: "-2px" }}
+            >
+                <path
+                    fill="currentColor"
+                    d="M12 3a1 1 0 0 1 1 1v9.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42L11 13.59V4a1 1 0 0 1 1-1ZM5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1Z"
+                />
+            </svg>
+        );
+    }
+
     return (
         <div className="page">
             <header className="topBar">
@@ -151,6 +232,10 @@ export function ScoreboardPage() {
                 </div>
 
                 <div className="topBar__right">
+                    <button className="btn btn--ghost" disabled={match.status !== "finished" || isExporting} onClick={() => void exportCsvReport()}>
+                        <ExportIcon size={30} />
+                        {/* {isExporting ? "Esporto…" : "Esporta CSV"} */}
+                    </button>
                     <button className="btn btn--ghost" onClick={() => setSettingsOpen(true)}>
                         Impostazioni
                     </button>

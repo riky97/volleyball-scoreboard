@@ -348,6 +348,12 @@
     background: transparent;
 }
 
+.btn--ghost:disabled {
+    background: transparent;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .modalOverlay {
     position: fixed;
     inset: 0;

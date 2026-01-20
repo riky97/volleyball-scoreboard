@@ -3,5 +3,12 @@
     "identifier": "default",
     "description": "enables the default permissions",
     "windows": ["main"],
-    "permissions": ["core:default", "dialog:default", "dialog:allow-confirm", "core:window:allow-close", "core:window:allow-destroy"]
+    "permissions": [
+        "core:default",
+        "dialog:default",
+        "dialog:allow-confirm",
+        "dialog:allow-save",
+        "core:window:allow-close",
+        "core:window:allow-destroy"
+    ]
 }
