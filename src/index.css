@@ -25,6 +25,9 @@
     --danger: #dc2626;
     --focus: rgba(37, 99, 235, 0.35);
 
+    /* UI scaling for large displays (TVs). 1 = normal. */
+    --tv-scale: 1;
+
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -61,4 +64,25 @@ button {
 *:focus-visible {
     outline: 3px solid var(--focus);
     outline-offset: 2px;
+}
+
+/* Large screens (typical TVs / large monitors) */
+@media (min-width: 1600px) and (min-height: 900px) {
+    :root {
+        --tv-scale: 1.12;
+    }
+}
+
+/* 4K-ish layouts */
+@media (min-width: 2400px) {
+    :root {
+        --tv-scale: 1.25;
+    }
+}
+
+/* Ultra-wide / very large 4K setups */
+@media (min-width: 3200px) {
+    :root {
+        --tv-scale: 1.35;
+    }
 }
