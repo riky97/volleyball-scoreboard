@@ -31,7 +31,7 @@ Desktop volleyball scoreboard (Windows target) built with **Tauri 2 + React 19 +
 - 4-space indent, double quotes, semicolons, `type` aliases over interfaces.
 - Always guard Tauri-only APIs with `isTauri()` and provide a browser fallback.
 - Default team names are `"Casa"` / `"Ospite"`.
-- Version lives in both `package.json` and `src-tauri/tauri.conf.json`: keep them in sync on release.
+- Version lives in `package.json`, `src-tauri/tauri.conf.json` and `src-tauri/Cargo.toml` (currently out of sync: Cargo says 0.1.0): use `/release` to bump all three.
 
 ## Claude Code setup (`.claude/`)
 
