@@ -1,31 +1,8 @@
 {
-  "enabledPlugins": {
-    "claude-code-setup@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
-    "ponytail@ponytail": true,
-    "claude-mem@thedotmack": true
-  },
-  "extraKnownMarketplaces": {
-    "claude-plugins-official": {
-      "source": {
-        "source": "github",
-        "repo": "anthropics/claude-plugins-official"
-      }
-    },
-    "ponytail": {
-      "source": {
-        "source": "github",
-        "repo": "DietrichGebert/ponytail"
-      }
-    },
-    "thedotmack": {
-      "source": {
-        "source": "github",
-        "repo": "thedotmack/claude-mem"
-      }
-    }
-  },
+  "enabledMcpjsonServers": [
+    "context7",
+    "playwright"
+  ],
   "hooks": {
     "PreToolUse": [
       {
@@ -51,8 +28,39 @@
       }
     ]
   },
-  "enabledMcpjsonServers": [
-    "context7",
-    "playwright"
-  ]
+  "enabledPlugins": {
+    "claude-code-setup@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "ponytail@ponytail": true,
+    "claude-mem@thedotmack": true,
+    "impeccable@impeccable": true,
+    "code-review@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    },
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
+    },
+    "impeccable": {
+      "source": {
+        "source": "github",
+        "repo": "pbakaus/impeccable"
+      }
+    }
+  }
 }
