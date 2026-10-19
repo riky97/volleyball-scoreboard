@@ -10,7 +10,9 @@ export function TeamPanel({ side, team }: Props) {
         <section className={`teamPanel teamPanel--${side}`} aria-label={`Squadra ${team.name}`}>
             <header className="teamPanel__header">
                 <div className="teamPanel__nameRow">
-                    <h2 className="teamPanel__name">{team.name}</h2>
+                    <h2 className="teamPanel__name" title={team.name}>
+                        {team.name}
+                    </h2>
                     {team.isServing ? <span className="badge badge--serve">Servizio</span> : null}
                 </div>
                 <div className="teamPanel__meta">

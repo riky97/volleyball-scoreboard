@@ -51,13 +51,12 @@ export function SettingsModal({ open, home, away, rules, onClose, onApply }: Pro
     if (!open) return null;
 
     return (
-        <div className="modalOverlay" role="dialog" aria-modal="true" aria-label="Impostazioni">
+        <div className="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="settings-title">
             <div className="modal">
                 <header className="modal__header">
-                    <h3 className="modal__title">Impostazioni</h3>
-                    <button className="btn btn--ghost" onClick={onClose}>
-                        Chiudi
-                    </button>
+                    <h2 className="modal__title" id="settings-title">
+                        Impostazioni
+                    </h2>
                 </header>
 
                 <div className="modal__content">

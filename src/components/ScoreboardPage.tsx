@@ -200,7 +200,6 @@ export function ScoreboardPage() {
                 viewBox="0 0 24 24"
                 aria-hidden="true"
                 focusable="false"
-                style={{ marginRight: 8, verticalAlign: "-2px" }}
             >
                 <path
                     fill="currentColor"
@@ -232,9 +231,14 @@ export function ScoreboardPage() {
                 </div>
 
                 <div className="topBar__right">
-                    <button className="btn btn--ghost" disabled={match.status !== "finished" || isExporting} onClick={() => void exportCsvReport()}>
+                    <button
+                        className="btn btn--ghost btn--icon"
+                        disabled={match.status !== "finished" || isExporting}
+                        onClick={() => void exportCsvReport()}
+                        aria-label="Esporta report CSV"
+                        title={match.status === "finished" ? "Esporta report CSV" : "Esporta report CSV (disponibile a fine partita)"}
+                    >
                         <ExportIcon size={30} />
-                        {/* {isExporting ? "Esporto…" : "Esporta CSV"} */}
                     </button>
                     <button className="btn btn--ghost" onClick={() => setSettingsOpen(true)}>
                         Impostazioni
@@ -303,22 +307,24 @@ export function ScoreboardPage() {
                         </div>
                     ) : null}
 
-                    <div className="manualSet">
-                        <div className="manualSet__label">Assegna set (manuale)</div>
-                        <div className="manualSet__buttons">
-                            <button className="btn btn--ghost" onClick={() => awardSetTo("home")}>
-                                Set {match.home.name}
-                            </button>
-                            <button className="btn btn--ghost" onClick={() => awardSetTo("away")}>
-                                Set {match.away.name}
-                            </button>
+                    {match.status !== "finished" ? (
+                        <div className="manualSet">
+                            <div className="manualSet__label">Assegna set (manuale)</div>
+                            <div className="manualSet__buttons">
+                                <button className="btn btn--ghost" onClick={() => awardSetTo("home")} title={`Set ${match.home.name}`}>
+                                    Set {match.home.name}
+                                </button>
+                                <button className="btn btn--ghost" onClick={() => awardSetTo("away")} title={`Set ${match.away.name}`}>
+                                    Set {match.away.name}
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    ) : null}
 
                     <div className="hintBox">
                         <div className="hintBox__title">Scorciatoie</div>
                         <div className="hintBox__body">
-                            Q/A: +/− {match.home.name} • P/L: +/− {match.away.name} • W/O: timeout • 1/2: servizio • U: annulla
+                            Q/A: +/− Casa • P/L: +/− Ospite • W/O: timeout • 1/2: servizio • U: annulla
                         </div>
                     </div>
                 </section>

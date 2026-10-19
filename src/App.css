@@ -175,6 +175,12 @@
 .teamPanel__name {
     margin: 0;
     font-size: calc(clamp(18px, 1.2vw, 26px) * var(--tv-scale));
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    overflow-wrap: anywhere;
 }
 
 .teamPanel__meta {
@@ -268,7 +274,15 @@
 .manualSet__buttons {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap;
+}
+
+/* Long team names: one line each, full name in the tooltip. */
+.manualSet__buttons .btn {
+    flex: 0 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .hintBox {
@@ -347,6 +361,11 @@
     background: transparent;
 }
 
+.btn--icon {
+    display: inline-grid;
+    place-items: center;
+}
+
 .btn--ghost:disabled {
     background: transparent;
     opacity: 0.5;
@@ -382,7 +401,7 @@
 
 .modal__title {
     margin: 0;
-    font-size: 16px;
+    font-size: calc(clamp(18px, 1.2vw, 26px) * var(--tv-scale));
 }
 
 .modal__content {
