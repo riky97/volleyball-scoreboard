@@ -88,7 +88,16 @@ function awardSet(state: MatchState, winner: TeamSide): MatchState {
         },
     };
 
-    return finishIfNeeded(next);
+    const finished = finishIfNeeded(next);
+    if (finished.status !== "finished") return finished;
+
+    // Match over: stay on the last set so its final score remains visible.
+    return {
+        ...finished,
+        currentSet: state.currentSet,
+        home: { ...finished.home, points: state.home.points },
+        away: { ...finished.away, points: state.away.points },
+    };
 }
 
 function shouldAutoWinSet(state: MatchState): TeamSide | null {

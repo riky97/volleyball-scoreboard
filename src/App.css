@@ -5,7 +5,6 @@
 
 .page {
     max-width: 1600px;
-    min-height: 100vh;
     margin: 0 auto;
     padding: calc(clamp(16px, 2.2vw, 40px) * var(--tv-scale));
     display: flex;
@@ -137,7 +136,7 @@
 
 .scoreGrid {
     display: grid;
-    grid-template-columns: 1fr minmax(calc(420px * var(--tv-scale)), calc(560px * var(--tv-scale))) 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(calc(420px * var(--tv-scale)), calc(560px * var(--tv-scale))) minmax(0, 1fr);
     gap: calc(clamp(14px, 1.6vw, 24px) * var(--tv-scale));
     align-items: stretch;
 }
@@ -432,21 +431,6 @@ select {
     font-size: calc(clamp(14px, 1vw, 18px) * var(--tv-scale));
 }
 
-.statusBar {
-    margin-top: auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: calc(10px * var(--tv-scale)) calc(12px * var(--tv-scale));
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    box-shadow: var(--shadow);
-    color: var(--muted);
-    font-size: calc(clamp(12px, 0.9vw, 16px) * var(--tv-scale));
-}
-
 @media (min-width: 1600px) {
     .topBar {
         padding: 18px 20px;
@@ -466,12 +450,12 @@ select {
     }
 }
 
-.statusBar__left,
-.statusBar__right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+
+/* TVs at native 4K: use the whole screen instead of a centered column. */
+@media (min-width: 2400px) {
+    .page {
+        max-width: none;
+    }
 }
 
 @media (max-width: 980px) {

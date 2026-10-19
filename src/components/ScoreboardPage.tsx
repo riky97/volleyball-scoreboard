@@ -364,20 +364,6 @@ export function ScoreboardPage() {
                 </div>
             </section>
 
-            <footer className="statusBar" aria-label="Barra di stato">
-                <div className="statusBar__left">
-                    <span>{formatStatusLabel(match.status)}</span>
-                    <span>•</span>
-                    <span>
-                        Set {match.currentSet} — Obiettivo {pointsTarget}
-                        {isTiebreak ? " (Tie-break)" : ""}
-                    </span>
-                </div>
-                <div className="statusBar__right">
-                    <span>Scorciatoie: Q/A Casa • P/L Ospite • W/O Timeout • 1/2 Servizio • U Annulla</span>
-                </div>
-            </footer>
-
             {settingsOpen && (
                 <SettingsModal
                     open={settingsOpen}

@@ -34,6 +34,14 @@ describe("matchReducer", () => {
         expect(s.home.setsWon).toBe(3);
     });
 
+    it("keeps the last set and its final score on screen when the match ends", () => {
+        const s = play(createInitialMatchState(), [...points("home", 25), ...points("home", 25), ...points("away", 10), ...points("home", 25)]);
+        expect(s.status).toBe("finished");
+        expect(s.currentSet).toBe(3);
+        expect(s.home.points).toBe(25);
+        expect(s.away.points).toBe(10);
+    });
+
     it("does not go below zero timeouts", () => {
         const s = play(createInitialMatchState(), Array(3).fill({ type: "timeout.take", team: "away" }));
         expect(s.away.timeoutsLeft).toBe(0);
