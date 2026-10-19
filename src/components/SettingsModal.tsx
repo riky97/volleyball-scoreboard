@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { MatchRules, TeamState } from "../models/match";
 
 type Draft = {
@@ -45,11 +45,8 @@ export function SettingsModal({ open, home, away, rules, onClose, onApply }: Pro
         [away.name, home.name, rules],
     );
 
+    // The parent mounts this modal only while open, so the draft starts fresh on every opening.
     const [draft, setDraft] = useState<Draft>(initialDraft);
-
-    useEffect(() => {
-        if (open) setDraft(initialDraft);
-    }, [initialDraft, open]);
 
     if (!open) return null;
 

@@ -136,7 +136,7 @@ export function ScoreboardPage() {
             s
                 .trim()
                 .replace(/\s+/g, "_")
-                .replace(/[^a-zA-Z0-9_\-]+/g, "")
+                .replace(/[^a-zA-Z0-9_-]+/g, "")
                 .slice(0, 40) || "team";
         const date = new Date();
         const yyyy = String(date.getFullYear());
@@ -378,28 +378,30 @@ export function ScoreboardPage() {
                 </div>
             </footer>
 
-            <SettingsModal
-                open={settingsOpen}
-                home={match.home}
-                away={match.away}
-                rules={match.rules}
-                onClose={() => setSettingsOpen(false)}
-                onApply={(draft) => {
-                    dispatch({ type: "match.rename_team", team: "home", name: draft.homeName });
-                    dispatch({ type: "match.rename_team", team: "away", name: draft.awayName });
-                    dispatch({
-                        type: "rules.update",
-                        rules: {
-                            bestOf: draft.bestOf,
-                            pointsToWinSet: draft.pointsToWinSet,
-                            pointsToWinTiebreak: draft.pointsToWinTiebreak,
-                            winByTwo: draft.winByTwo,
-                            applyAutomaticSetWin: draft.applyAutomaticSetWin,
-                            timeoutsPerSet: draft.timeoutsPerSet,
-                        },
-                    });
-                }}
-            />
+            {settingsOpen && (
+                <SettingsModal
+                    open={settingsOpen}
+                    home={match.home}
+                    away={match.away}
+                    rules={match.rules}
+                    onClose={() => setSettingsOpen(false)}
+                    onApply={(draft) => {
+                        dispatch({ type: "match.rename_team", team: "home", name: draft.homeName });
+                        dispatch({ type: "match.rename_team", team: "away", name: draft.awayName });
+                        dispatch({
+                            type: "rules.update",
+                            rules: {
+                                bestOf: draft.bestOf,
+                                pointsToWinSet: draft.pointsToWinSet,
+                                pointsToWinTiebreak: draft.pointsToWinTiebreak,
+                                winByTwo: draft.winByTwo,
+                                applyAutomaticSetWin: draft.applyAutomaticSetWin,
+                                timeoutsPerSet: draft.timeoutsPerSet,
+                            },
+                        });
+                    }}
+                />
+            )}
         </div>
     );
 }

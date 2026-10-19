@@ -9,8 +9,7 @@ Desktop volleyball scoreboard (Windows target) built with **Tauri 2 + React 19 +
 - `npm run build` — `tsc -b && vite build` (typecheck + bundle to `dist/`)
 - `npm run tauri build` — build the installer
 - `npm run lint` — ESLint (flat config, `eslint.config.js`)
-
-No test suite exists yet.
+- `npm test` — Vitest unit tests (`src/**/*.test.ts`, pure logic only)
 
 ## Architecture
 
@@ -34,6 +33,9 @@ No test suite exists yet.
 - Default team names are `"Casa"` / `"Ospite"`.
 - Version lives in both `package.json` and `src-tauri/tauri.conf.json`: keep them in sync on release.
 
-## Known issues
+## Claude Code setup (`.claude/`)
 
-`npm run lint` currently reports 2 pre-existing errors: a useless escape in `ScoreboardPage.tsx` (regex in `buildDefaultCsvFileName`) and `setState` inside an effect in `SettingsModal.tsx`.
+- Hooks: ESLint `--fix` runs after every edit of a `.ts/.tsx` file (remaining errors are reported back); direct edits to `package-lock.json` / `Cargo.lock` are blocked.
+- Skills: `/release <version>` (bump version in package.json, tauri.conf.json, Cargo.toml + build + tag); `tauri-conventions` (auto-loaded rules for Tauri code).
+- Subagents: `test-writer` (Vitest tests for the reducer/models/utils), `ui-reviewer` (TV readability + a11y review, read-only).
+- MCP (`.mcp.json`): `context7` for up-to-date Tauri 2 / React 19 docs, `playwright` to check the UI under `npm run dev`.
