@@ -26,6 +26,11 @@ Desktop volleyball scoreboard (Windows target) built with **Tauri 2 + React 19 +
 
 `q`/`a` home +/−, `p`/`l` away +/−, `w`/`o` timeout home/away, `1`/`2` serving, `u` undo.
 
+## Branches
+
+- `develop` — working branch: all development, tests and fixes go here (or on feature branches merged into it).
+- `master` — published releases only. Never commit directly; it only receives merges from `develop` via `/release`.
+
 ## Conventions
 
 - 4-space indent, double quotes, semicolons, `type` aliases over interfaces.
