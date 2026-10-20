@@ -9,6 +9,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { confirm, message, save } from "@tauri-apps/plugin-dialog";
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { buildMatchReportCsv } from "../utils/matchReportCsv";
+import { shortcutAction } from "../state/shortcuts";
 
 function isEditableTarget(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) return false;
@@ -51,21 +52,7 @@ export function ScoreboardPage() {
             if (e.defaultPrevented) return;
             if (isEditableTarget(e.target)) return;
 
-            const key = e.key.toLowerCase();
-
-            const map: Record<string, MatchAction> = {
-                q: { type: "point.increment", team: "home" },
-                a: { type: "point.decrement", team: "home" },
-                p: { type: "point.increment", team: "away" },
-                l: { type: "point.decrement", team: "away" },
-                w: { type: "timeout.take", team: "home" },
-                o: { type: "timeout.take", team: "away" },
-                "1": { type: "serving.set", team: "home" },
-                "2": { type: "serving.set", team: "away" },
-                u: { type: "undo" },
-            };
-
-            const action = map[key];
+            const action = shortcutAction(e);
             if (!action) return;
 
             e.preventDefault();

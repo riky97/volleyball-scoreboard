@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createInitialMatchState, type MatchState } from "../models/match";
+import { createInitialMatchState, getWinner, type MatchState } from "../models/match";
 import { createInitialUndoableState, matchReducer, undoableMatchReducer, type MatchAction } from "./matchReducer";
 
 function play(state: MatchState, actions: MatchAction[]): MatchState {
@@ -40,6 +40,13 @@ describe("matchReducer", () => {
         expect(s.currentSet).toBe(3);
         expect(s.home.points).toBe(25);
         expect(s.away.points).toBe(10);
+    });
+
+    it("getWinner returns null while in progress and the team with more sets when finished", () => {
+        const inProgress = play(createInitialMatchState(), points("away", 25));
+        expect(getWinner(inProgress)).toBeNull();
+        const finished = play(inProgress, [...points("away", 25), ...points("away", 25)]);
+        expect(getWinner(finished)).toBe("away");
     });
 
     it("does not go below zero timeouts", () => {

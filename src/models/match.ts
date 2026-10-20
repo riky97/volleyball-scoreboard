@@ -93,6 +93,11 @@ export function getPointsTargetForSet(rules: MatchRules, setNumber: number): num
     return isTiebreak ? rules.pointsToWinTiebreak : rules.pointsToWinSet;
 }
 
+export function getWinner(state: MatchState): TeamSide | null {
+    if (state.status !== "finished") return null;
+    return state.home.setsWon > state.away.setsWon ? "home" : "away";
+}
+
 export function clampNonNegative(value: number): number {
     return value < 0 ? 0 : value;
 }
