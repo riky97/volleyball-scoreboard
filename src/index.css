@@ -10,20 +10,29 @@
     line-height: 1.4;
     font-weight: 400;
 
-    /* Desktop-like light theme */
-    color-scheme: light;
-    --app-bg: #f3f4f6;
-    --surface: #ffffff;
-    --surface-2: #f9fafb;
-    --border: rgba(15, 23, 42, 0.14);
-    --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    /* Dark scoreboard theme. Every color lives here: a light theme only changes these values. */
+    color-scheme: dark;
+    --app-bg: #0b1120;
+    --surface: #111a2e;
+    --surface-2: #0f172a;
+    --border: #1e293b;
+    --border-strong: #334155;
+    --frame: #334155;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    --overlay: rgba(2, 6, 23, 0.7);
 
-    --text: #0f172a;
-    --muted: rgba(15, 23, 42, 0.65);
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --muted-strong: #cbd5e1;
+    --on-primary: #ffffff;
 
     --primary: #2563eb;
-    --danger: #dc2626;
-    --focus: rgba(37, 99, 235, 0.35);
+    --home: #3b82f6;
+    --away: #f97316;
+    --serve: #facc15;
+    --live: #4ade80;
+    --danger: #ef4444;
+    --focus: rgba(59, 130, 246, 0.5);
 
     /* UI scaling for large displays (TVs). 1 = normal. */
     --tv-scale: 1;
@@ -32,15 +41,6 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-    font-weight: 500;
-    color: #646cff;
-    text-decoration: inherit;
-}
-a:hover {
-    color: #535bf2;
 }
 
 body {

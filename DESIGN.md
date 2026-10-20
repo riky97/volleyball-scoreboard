@@ -1,17 +1,22 @@
 ---
 name: Segnapunti Pallavolo
-description: Club volleyball scoreboard for a scorer's PC and the gym's big screen.
+description: Club volleyball scoreboard: a scorer window on the PC and a public board window on the gym's big screen.
 colors:
-  app-bg: "#f3f4f6"
-  surface: "#ffffff"
-  surface-2: "#f9fafb"
-  text: "#0f172a"
-  muted: "rgba(15, 23, 42, 0.65)"
-  border: "rgba(15, 23, 42, 0.14)"
+  app-bg: "#0b1120"
+  surface: "#111a2e"
+  surface-2: "#0f172a"
+  border: "#1e293b"
+  border-strong: "#334155"
+  text: "#f8fafc"
+  muted: "#94a3b8"
+  muted-strong: "#cbd5e1"
+  on-primary: "#ffffff"
   primary: "#2563eb"
-  focus: "rgba(37, 99, 235, 0.35)"
-  danger: "#dc2626"
-  success: "#16a34a"
+  home: "#3b82f6"
+  away: "#f97316"
+  serve: "#facc15"
+  live: "#4ade80"
+  danger: "#ef4444"
 typography:
   display:
     fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
@@ -51,7 +56,7 @@ spacing:
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
-    textColor: "{colors.surface}"
+    textColor: "{colors.on-primary}"
     rounded: "{rounded.control}"
     typography: "{typography.body}"
   button-neutral:
@@ -64,7 +69,7 @@ components:
     rounded: "{rounded.control}"
     typography: "{typography.body}"
   button-danger:
-    backgroundColor: "rgba(220, 38, 38, 0.12)"
+    backgroundColor: "color-mix(in srgb, #ef4444 15%, transparent)"
     textColor: "{colors.text}"
     rounded: "{rounded.control}"
     typography: "{typography.body}"
@@ -93,40 +98,43 @@ components:
 
 The interface behaves like the electronic scoreboard on a gym wall: the two point totals dominate the screen and everything else exists to serve them. It is shown at the same time to a volunteer scorer working at arm's length and to players and spectators reading it from across the court, so every decision is judged first by distance legibility and only then by density.
 
-The look is clean and functional, and it is the style to keep. White surfaces sit on a cool light-grey ground, separated by hairline borders and one soft ambient shadow. Colour is rationed: a single blue carries action and progress, red marks only the destructive action, green marks only the winner. Type is the platform sans in heavy weights, and the score numerals are set at poster size with tabular figures so they never jump as they change.
+The look is a dark gym scoreboard: white numerals on deep navy (`#0B1120`), dark navy panels separated by thin borders. Colour is rationed and always means something: blue is the home team and the primary action, orange is the away team, yellow marks who is serving, green marks the live board and the winner, red only the destructive action. Type is the platform sans in heavy weights, and the score numerals are set at poster size with tabular figures so they never jump as they change.
+
+The app has two windows. The **scorer window** on the PC holds the controls around a 16:9 preview; the **public board** window goes full screen on the 40–50" monitor and shows nothing but the scoreboard. Both render the same `Scoreboard` component, so the preview is exactly what the gym sees. The theme is dark today but may switch back to light: every colour is a CSS variable in `src/index.css`, so a light theme is a change of values only.
 
 The whole system scales as one unit for large displays through a single multiplier (`--tv-scale`), instead of separate layouts per screen size.
 
 **Key Characteristics:**
 - Score numerals at poster size (up to 280px × scale), weight 900, tabular figures.
-- White panels on light grey, hairline borders, one ambient shadow.
-- One accent colour (blue) for actions and sets won; red and green reserved for meaning.
+- Dark navy ground and panels, thin borders; white numerals.
+- Every colour carries one meaning: blue home/action, orange away, yellow serve, green live/winner, red danger.
 - Heavy, legible weights (700–900) throughout; nothing thin.
-- Uniform scaling for TVs via `--tv-scale` (1 → 1.12 → 1.25 → 1.35).
+- The public board sizes everything in container units, so it fills any window from the preview box to a 4K TV.
 
 ## Colors
 
-A neutral, light, low-chroma palette with one functional blue and two semantic signals.
+A dark, low-chroma navy palette with a few saturated signals, each with one job.
 
 ### Primary
-- **Scoreboard Blue** (`primary`): primary buttons (+1, Annulla, Salva), sets-won dots, and at reduced opacity the focus ring (`focus`) and the home panel's border tint. It is the only colour that means "act" or "progress".
+- **Action Blue** (`primary`): primary buttons (+1, Annulla, Salva). Darker than Home Blue so white text on it passes contrast.
+
+### Team and state signals
+- **Home Blue** (`home`): home team bar, home sets-won number, home panel accents. Home is always on the left.
+- **Away Orange** (`away`): the same for the away team, on the right. Orange instead of red so the two teams differ in lightness too, not only in hue.
+- **Serve Yellow** (`serve`): only the volleyball icon next to the team that is serving.
+- **Live Green** (`live`): only "Tabellone aperto" and the winner ("FINE PARTITA", "Vincitore").
+- **Whistle Red** (`danger`): only "Nuova partita", as a tinted fill.
 
 ### Neutral
-- **Gym Floor Grey** (`app-bg`): the page ground behind every panel.
-- **Panel White** (`surface`): panels, bars, dialog, inputs.
-- **Inset Grey** (`surface-2`): secondary boxes inside panels (manual set, shortcuts), chips, neutral buttons.
-- **Ink Navy** (`text`): all primary text and the score numerals.
-- **Muted Ink** (`muted`): labels, subtitles, secondary meta.
-- **Hairline** (`border`): every border; darkens on button hover.
-
-### Semantic
-- **Whistle Red** (`danger`): only "Nuova partita" (tinted background) and the away panel's border tint.
-- **Winner Green** (`success`): only the end-of-match winner banner, at 12% fill with a 25% border.
+- **Gym Night** (`app-bg`): the ground of both windows and of the board.
+- **Panel Navy** (`surface`): bars and control groups; `surface-2` for nested boxes.
+- **Line** (`border`) and **Frame** (`border-strong`): borders; the frame outlines the preview.
+- **Chalk** (`text`): all primary text and the numerals. **Muted** / **Muted Strong**: labels, timeouts, set status.
 
 ### Named Rules
-**The One Accent Rule.** Blue is the only colour for actions and progress. Red and green are signals with exactly one job each; never use them decoratively.
+**The One Meaning Rule.** Each signal colour has exactly one job (see above). Never use one decoratively or for a second meaning.
 
-**The Tint, Don't Paint Rule.** Team identity is carried by a faint border tint (blue home, red away), never by filling panels with colour. The numerals stay ink on white.
+**The Variables Only Rule.** Every colour lives in `:root` of `src/index.css`. Components and `App.css` use `var(--…)` or `color-mix()` on a variable, never a literal colour, so a light theme is only a change of values.
 
 ## Typography
 
@@ -160,13 +168,13 @@ Page padding and gaps are fluid (`clamp(16px, 2.2vw, 40px)` and `clamp(14px, 1.6
 
 ## Elevation & Depth
 
-Nearly flat. Every top-level block (top bar, set row, panels, control groups) uses the same single ambient shadow; nested boxes are flat, with an inset grey fill and a hairline border instead. The dialog sits over a 35% ink scrim.
+Nearly flat. On the dark ground depth comes from tone: panels are a lighter navy than the ground, nested boxes darker, all with thin borders. One soft shadow remains on top-level blocks. The public board has no panels at all: numerals sit directly on the ground. The dialog sits over a dark scrim (`--overlay`).
 
 ### Shadow Vocabulary
-- **Ambient** (`box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08)`): every top-level block, never nested ones.
+- **Ambient** (`--shadow`: `0 10px 30px rgba(0, 0, 0, 0.35)`): top-level blocks of the scorer window, never nested ones, never on the board.
 
 ### Named Rules
-**The One Shadow Rule.** There is exactly one shadow. Depth beyond that comes from the grey inset fill, never from a second, stronger shadow.
+**The One Shadow Rule.** There is exactly one shadow. Depth beyond that comes from tone (lighter or darker navy), never from a second, stronger shadow.
 
 ## Shapes
 
@@ -176,25 +184,29 @@ Soft rounded rectangles throughout, with radius growing with the size of the con
 
 ### Buttons
 - **Shape:** gently rounded (10px), 1px hairline border, weight 800, fluid padding × scale.
-- **Primary:** Scoreboard Blue fill, white text. Used for the most frequent action in a group (+1, Annulla, Salva).
-- **Neutral / Ghost:** inset grey or transparent fill, ink text. Everything that is not the primary action.
+- **Primary:** Action Blue fill, white text. Used for the most frequent action in a group (+1, Annulla, Salva).
+- **Neutral / Ghost:** nested-navy or transparent fill, Chalk text. Everything that is not the primary action.
 - **Danger:** red at 12% fill with a 35% red border; only "Nuova partita", always behind a confirmation.
 - **Icon button:** ghost button with a centred icon; must carry `aria-label` and a tooltip.
-- **Hover / Focus:** hover darkens the border to 24% ink; focus shows a 3px blue focus ring offset by 2px. Disabled ghost buttons drop to 50% opacity.
+- **Hover / Focus:** hover brightens the border to Frame; focus shows a 3px blue focus ring offset by 2px. Disabled ghost buttons drop to 50% opacity.
 
 ### Chips
-- **Style:** pill, inset grey fill, hairline border, label type. Used for set, target and sets-to-win in the top bar, timeout counts and the "Servizio" badge in team panels.
+- **Style:** pill, nested-navy fill, thin border, label type. Used for set, target and sets-to-win in the top bar, timeout counts and the "Servizio" badge in team panels.
 
 ### Cards / Containers
-- **Score panel:** white, 18px radius, ambient shadow, faint blue (home) or red (away) border tint. Team name clamped to two lines.
-- **Inset box:** inset grey, 12px radius, hairline border, no shadow (manual set, shortcuts, winner banner in green).
+- **Panel:** Panel Navy, 16–18px radius, ambient shadow, thin border.
+- **Inset box:** nested navy, 12px radius, thin border, no shadow.
 
 ### Inputs / Fields
-- **Style:** white fill, hairline border, 12px radius, fluid padding × scale. Labels above in muted label type.
+- **Style:** Panel Navy fill, thin border, 12px radius, fluid padding × scale. Labels above in muted label type.
 - **Focus:** the shared 3px blue focus ring.
 
-### Score Numerals (signature component)
-The two point totals: display type, centred in their panel with a minimum height so the panel does not jump between one and two digits.
+### Public Scoreboard (signature component)
+`Scoreboard` (`src/components/Scoreboard.tsx`, `.board…` in `App.css`): the only thing on the big monitor and, at 16:9, the preview in the scorer window.
+- **Top row:** home name with a blue bar (left), away name with an orange bar (right), one line each with ellipsis; "Timeout n" under each name; the yellow ball next to the serving team; in the middle "SET n" (with "· Tie-break" in the deciding set).
+- **Centre:** the two point totals at poster size (`min(52cqh, 21cqw)`, weight 900, tabular), and between them "SET VINTI" with the sets won in blue and orange.
+- **Match over:** the middle reads "FINE PARTITA" in green, the winner shows "Vincitore" in green under its name, the last set's points stay visible, the ball is hidden.
+- **Sizing:** `container-type: size` on the root; every size in `cqh`/`cqw`, never px, so it scales with its box.
 
 ## Do's and Don'ts
 
@@ -204,10 +216,11 @@ The two point totals: display type, centred in their panel with a minimum height
 - **Do** keep long team names to one or two lines with ellipsis and the full name in a tooltip.
 - **Do** give every icon-only control an `aria-label`.
 - **Do** keep everything on one screen from 720p up: if a change adds height, take it from somewhere else.
+- **Do** put anything the public must read in `Scoreboard`, so the preview and the TV can never differ.
 
 ### Don't:
-- **Don't** introduce a second accent colour or use red/green outside their single meaning.
-- **Don't** fill team panels with team colours; tint the border only.
+- **Don't** give a signal colour (blue, orange, yellow, green, red) a second meaning or use it as decoration.
+- **Don't** write a literal colour outside `src/index.css`.
 - **Don't** add a second shadow or shadows on nested boxes.
 - **Don't** use light or thin font weights, or fixed pixel font sizes.
 - **Don't** load web fonts or any other network asset: the app must work offline.

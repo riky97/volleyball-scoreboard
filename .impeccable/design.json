@@ -6,7 +6,7 @@
     "colorMeta": {
       "primary": {
         "role": "primary",
-        "displayName": "Scoreboard Blue",
+        "displayName": "Action Blue",
         "tonalRamp": [
           "oklch(15% 0.2 264)",
           "oklch(25% 0.2 264)",
@@ -32,23 +32,9 @@
           "oklch(95% 0.2 27)"
         ]
       },
-      "success": {
-        "role": "semantic",
-        "displayName": "Winner Green",
-        "tonalRamp": [
-          "oklch(15% 0.17 150)",
-          "oklch(25% 0.17 150)",
-          "oklch(35% 0.17 150)",
-          "oklch(45% 0.17 150)",
-          "oklch(55% 0.17 150)",
-          "oklch(65% 0.17 150)",
-          "oklch(80% 0.17 150)",
-          "oklch(95% 0.17 150)"
-        ]
-      },
       "text": {
         "role": "neutral",
-        "displayName": "Ink Navy",
+        "displayName": "Chalk",
         "tonalRamp": [
           "oklch(15% 0.04 265)",
           "oklch(25% 0.04 265)",
@@ -62,27 +48,47 @@
       },
       "muted": {
         "role": "neutral",
-        "displayName": "Muted Ink"
+        "displayName": "Muted"
       },
       "border": {
         "role": "neutral",
-        "displayName": "Hairline"
+        "displayName": "Line"
       },
       "app-bg": {
         "role": "neutral",
-        "displayName": "Gym Floor Grey"
+        "displayName": "Gym Night"
       },
       "surface": {
         "role": "neutral",
-        "displayName": "Panel White"
+        "displayName": "Panel Navy"
       },
       "surface-2": {
         "role": "neutral",
-        "displayName": "Inset Grey"
+        "displayName": "Nested Navy"
       },
-      "focus": {
-        "role": "primary",
-        "displayName": "Focus Ring Blue"
+      "home": {
+        "role": "semantic",
+        "displayName": "Home Blue"
+      },
+      "away": {
+        "role": "semantic",
+        "displayName": "Away Orange"
+      },
+      "serve": {
+        "role": "semantic",
+        "displayName": "Serve Yellow"
+      },
+      "live": {
+        "role": "semantic",
+        "displayName": "Live Green"
+      },
+      "border-strong": {
+        "role": "neutral",
+        "displayName": "Frame"
+      },
+      "muted-strong": {
+        "role": "neutral",
+        "displayName": "Muted Strong"
       }
     },
     "typographyMeta": {
@@ -110,8 +116,8 @@
     "shadows": [
       {
         "name": "ambient",
-        "value": "0 10px 30px rgba(15, 23, 42, 0.08)",
-        "purpose": "Every top-level block; never nested boxes."
+        "value": "0 10px 30px rgba(0, 0, 0, 0.35)",
+        "purpose": "Top-level blocks of the scorer window; never nested, never on the board."
       }
     ],
     "motion": [],
@@ -186,25 +192,15 @@
   ],
   "narrative": {
     "northStar": "Il Tabellone di Palestra (The Gym Scoreboard)",
-    "overview": "The interface behaves like the electronic scoreboard on a gym wall: the two point totals dominate the screen and everything else exists to serve them. The look is clean and functional, and it is the style to keep.",
+    "overview": "A dark gym scoreboard: white numerals on deep navy. The scorer window holds the controls around a 16:9 preview; the public board window shows only the Scoreboard component on the big monitor. Every colour is a CSS variable so a light theme is a change of values.",
     "keyCharacteristics": [
-      "Score numerals at poster size (up to 280px × scale), weight 900, tabular figures.",
-      "White panels on light grey, hairline borders, one ambient shadow.",
-      "One accent colour (blue) for actions and sets won; red and green reserved for meaning.",
+      "Score numerals at poster size, weight 900, tabular figures.",
+      "Dark navy ground and panels, thin borders; white numerals.",
+      "Every colour carries one meaning: blue home/action, orange away, yellow serve, green live/winner, red danger.",
       "Heavy, legible weights (700–900) throughout; nothing thin.",
-      "Uniform scaling for TVs via --tv-scale (1 → 1.12 → 1.25 → 1.35)."
+      "The public board sizes everything in container units, so it fills any window from the preview box to a 4K TV."
     ],
     "rules": [
-      {
-        "name": "The One Accent Rule",
-        "section": "colors",
-        "body": "Blue is the only colour for actions and progress. Red and green are signals with exactly one job each; never use them decoratively."
-      },
-      {
-        "name": "The Tint, Don't Paint Rule",
-        "section": "colors",
-        "body": "Team identity is carried by a faint border tint (blue home, red away), never by filling panels with colour. The numerals stay ink on white."
-      },
       {
         "name": "The Numerals First Rule",
         "section": "typography",
@@ -223,7 +219,17 @@
       {
         "name": "The One Shadow Rule",
         "section": "elevation",
-        "body": "There is exactly one shadow. Depth beyond that comes from the grey inset fill, never from a second, stronger shadow."
+        "body": "There is exactly one shadow. Depth beyond that comes from tone (lighter or darker navy), never from a second, stronger shadow."
+      },
+      {
+        "name": "The One Meaning Rule",
+        "section": "colors",
+        "body": "Each signal colour has exactly one job. Never use one decoratively or for a second meaning."
+      },
+      {
+        "name": "The Variables Only Rule",
+        "section": "colors",
+        "body": "Every colour lives in :root of src/index.css. Components and App.css use var(--…) or color-mix() on a variable, never a literal colour."
       }
     ],
     "dos": [
@@ -231,14 +237,15 @@
       "Do keep home left / away right in any new element.",
       "Do keep long team names to one or two lines with ellipsis and the full name in a tooltip.",
       "Do give every icon-only control an aria-label.",
-      "Do keep everything on one screen from 720p up: if a change adds height, take it from somewhere else."
+      "Do keep everything on one screen from 720p up: if a change adds height, take it from somewhere else.",
+      "Do put anything the public must read in Scoreboard, so the preview and the TV can never differ."
     ],
     "donts": [
-      "Don't introduce a second accent colour or use red/green outside their single meaning.",
-      "Don't fill team panels with team colours; tint the border only.",
       "Don't add a second shadow or shadows on nested boxes.",
       "Don't use light or thin font weights, or fixed pixel font sizes.",
-      "Don't load web fonts or any other network asset: the app must work offline."
+      "Don't load web fonts or any other network asset: the app must work offline.",
+      "Don't give a signal colour (blue, orange, yellow, green, red) a second meaning or use it as decoration.",
+      "Don't write a literal colour outside src/index.css."
     ]
   }
 }
