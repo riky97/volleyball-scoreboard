@@ -102,7 +102,7 @@ The look is a dark gym scoreboard: white numerals on deep navy (`#0B1120`), dark
 
 The app has two windows. The **scorer window** on the PC holds the controls around a 16:9 preview; the **public board** window goes full screen on the 40–50" monitor and shows nothing but the scoreboard. Both render the same `Scoreboard` component, so the preview is exactly what the gym sees. The theme is dark today but may switch back to light: every colour is a CSS variable in `src/index.css`, so a light theme is a change of values only.
 
-The whole system scales as one unit for large displays through a single multiplier (`--tv-scale`), instead of separate layouts per screen size.
+The scorer window scales for large displays through a single multiplier (`--tv-scale`); the board scales with its own box (container units).
 
 **Key Characteristics:**
 - Score numerals at poster size (up to 280px × scale), weight 900, tabular figures.
@@ -157,14 +157,15 @@ A dark, low-chroma navy palette with a few saturated signals, each with one job.
 
 ## Layout
 
-A centred column (max 1600px; full width from 2400px viewport width up) stacked top to bottom: top bar (title, set chips, actions), set row (team set dots and sets-won score), the score grid, then the two control groups.
+Two windows.
 
-The score grid has three columns: home panel, centre panel (420–560px × scale), away panel. The side columns use `minmax(0, 1fr)` so oversized numerals can never push the grid wider than the screen. Below 980px the grid stacks into one column. Controls sit in two equal columns, home left and away right, mirroring the panels above.
+- **Scorer window** (`ScoreboardPage`): a full-height column, max 1600px wide (full width from 2400px). Top bar (title and match status; "Apri tabellone" or "● Tabellone aperto" + "Chiudi tabellone"; Impostazioni; Nuova partita), then the 16:9 board preview taking all the free height, then the controls row: home group (left), centre group (Annulla, "Altre azioni…"), away group (right). The "Altre azioni…" menu opens upwards over the preview. No scroll from 1280×720 up.
+- **Board window** (`BoardWindow`, `?view=board`): the `Scoreboard` alone, edge to edge, no cursor.
 
-Page padding and gaps are fluid (`clamp(16px, 2.2vw, 40px)` and `clamp(14px, 1.6vw, 22px)`, both × scale); inside components the rhythm is 8 / 10 / 12px. The whole layout must fit one screen at 720p and up without scrolling.
+Inside the scorer window paddings and gaps are fluid (`clamp()` × `--tv-scale`); inside the board everything is in container units.
 
 ### Named Rules
-**The Mirror Rule.** Home is always left, away always right, in every row: set dots, panels and controls. Keyboard shortcuts follow the same sides (Q/A left, P/L right).
+**The Mirror Rule.** Home is always left, away always right, in every row: board, preview and controls. Keyboard shortcuts follow the same sides (Q/A, W, 1 left; P/L, O, 2 right).
 
 ## Elevation & Depth
 

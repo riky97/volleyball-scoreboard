@@ -17,14 +17,19 @@ Desktop volleyball scoreboard (Windows target) built with **Tauri 2 + React 19 +
 - `src/state/matchReducer.ts` — all match logic as a pure reducer (`matchReducer`) wrapped by `undoableMatchReducer` (history capped at 200). Actions are namespaced strings (`point.increment`, `set.award`, …). Keep game rules here, not in components.
 - `src/state/persistence.ts` — localStorage load/save (debounced 150 ms from `ScoreboardPage`).
 - `src/utils/matchReportCsv.ts` — CSV report for a finished match.
-- `src/components/ScoreboardPage.tsx` — main screen: keyboard shortcuts, close confirmation, CSV export, wiring of the reducer.
-- `src/components/` — `TeamPanel`, `SetIndicator`, `SettingsModal`.
-- `src/App.css` / `src/index.css` — plain CSS, BEM-like class names (`topBar__left`, `btn--ghost`), CSS variables for theme and `--tv-scale` for large displays.
-- `src-tauri/` — Rust shell. One custom command `write_text_file` (used for CSV export). Permissions in `src-tauri/capabilities/default.json`: any new Tauri API/plugin call needs its permission added there.
+- Two windows from one bundle: `src/App.tsx` renders `BoardWindow` when the URL has `?view=board`, else `ScoreboardPage`.
+- `src/components/ScoreboardPage.tsx` — scorer window (single source of truth): reducer, keyboard shortcuts, board preview, controls, "Altre azioni…" menu, close confirmation (also closes the board), CSV export, Apri/Chiudi tabellone.
+- `src/components/Scoreboard.tsx` — the public scoreboard; used both in the board window and as the 16:9 preview. Sized in container units (`cqh`/`cqw`). Anything the public must read goes here.
+- `src/components/BoardWindow.tsx` — board window: renders `Scoreboard`, F11 / double click = fullscreen, forwards shortcuts to the scorer, never changes state.
+- `src/board/channel.ts` — scorer ⇄ board messages (`match:state`, `board:hello`, `board:action`): Tauri events in the app, `BroadcastChannel` in the browser. `src/board/boardWindow.ts` — open/close the board window (`WebviewWindow` label `board`, `window.open` in the browser).
+- `src/state/shortcuts.ts` — key → `MatchAction` map shared by both windows.
+- `src/components/SettingsModal.tsx` — settings dialog.
+- `src/App.css` / `src/index.css` — plain CSS, BEM-like class names (`topBar__left`, `btn--ghost`). Dark theme; every colour is a variable in `:root` of `index.css` (never a literal elsewhere). `--tv-scale` scales the scorer window on large displays.
+- `src-tauri/` — Rust shell. One custom command `write_text_file` (used for CSV export); `tauri-plugin-window-state` remembers the board window's position/size/fullscreen. Permissions in `src-tauri/capabilities/default.json` (windows `main` and `board`): any new Tauri API/plugin call needs its permission added there.
 
-## Keyboard shortcuts (ScoreboardPage)
+## Keyboard shortcuts (`src/state/shortcuts.ts`)
 
-`q`/`a` home +/−, `p`/`l` away +/−, `w`/`o` timeout home/away, `1`/`2` serving, `u` undo.
+`q`/`a` home +/−, `p`/`l` away +/−, `w`/`o` timeout home/away, `1`/`2` serving, `u` undo. They work in both windows (the board forwards them). In the board window F11 or double click toggles fullscreen.
 
 ## Branches
 

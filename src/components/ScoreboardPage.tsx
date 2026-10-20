@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
-import { createInitialMatchState, getPointsTargetForSet, getSetsToWin, type TeamSide } from "../models/match";
+import { createInitialMatchState, getPointsTargetForSet, type TeamSide } from "../models/match";
 import { clearMatchState, loadMatchState, saveMatchState } from "../state/persistence";
 import { createInitialUndoableState, type MatchAction, undoableMatchReducer } from "../state/matchReducer";
-import { SetIndicator } from "./SetIndicator";
 import { SettingsModal } from "./SettingsModal";
-import { TeamPanel } from "./TeamPanel";
+import { Scoreboard } from "./Scoreboard";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { confirm, message, save } from "@tauri-apps/plugin-dialog";
 import { invoke, isTauri } from "@tauri-apps/api/core";
@@ -36,7 +35,6 @@ export function ScoreboardPage() {
 
     const pointsTarget = useMemo(() => getPointsTargetForSet(match.rules, match.currentSet), [match.currentSet, match.rules]);
 
-    const setsToWin = useMemo(() => getSetsToWin(match.rules), [match.rules]);
 
     const allowCloseRef = useRef(false);
 
@@ -197,22 +195,28 @@ export function ScoreboardPage() {
         }
     }
 
-    function ExportIcon(props: { size?: number; className?: string }) {
-        const size = props.size ?? 16;
+    // Closes the "Altre azioni…" menu after picking an entry.
+    function closeMenu(e: React.MouseEvent<HTMLElement>) {
+        e.currentTarget.closest("details")?.removeAttribute("open");
+    }
+
+    function teamControls(team: TeamSide, keys: { plus: string; minus: string; timeout: string; serve: string }) {
+        const t = match[team];
         return (
-            <svg
-                className={props.className}
-                width={size}
-                height={size}
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                focusable="false"
-            >
-                <path
-                    fill="currentColor"
-                    d="M12 3a1 1 0 0 1 1 1v9.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42L11 13.59V4a1 1 0 0 1 1-1ZM5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1Z"
-                />
-            </svg>
+            <div className={`controls__team controls__team--${team}`} aria-label={`Controlli ${t.name}`}>
+                <button className="btn btn--primary" onClick={() => dispatch({ type: "point.increment", team })}>
+                    +1 ({keys.plus})
+                </button>
+                <button className="btn btn--ghost" onClick={() => dispatch({ type: "point.decrement", team })}>
+                    −1 ({keys.minus})
+                </button>
+                <button className="btn btn--ghost" onClick={() => dispatch({ type: "timeout.take", team })} disabled={t.timeoutsLeft <= 0}>
+                    Timeout · {t.timeoutsLeft} ({keys.timeout})
+                </button>
+                <button className="btn btn--ghost" onClick={() => dispatch({ type: "serving.set", team })}>
+                    Servizio ({keys.serve})
+                </button>
+            </div>
         );
     }
 
@@ -221,30 +225,25 @@ export function ScoreboardPage() {
             <header className="topBar">
                 <div className="topBar__left">
                     <div className="appTitle">Segnapunti Pallavolo</div>
-                    <div className="appSubTitle">{formatStatusLabel(match.status)}</div>
-                </div>
-
-                <div className="topBar__center">
-                    <div className="chip" title="Set corrente">
-                        SET {match.currentSet}
-                    </div>
-                    <div className="chip chip--muted" title="Obiettivo punti set">
-                        Obiettivo: {pointsTarget}
-                        {isTiebreak ? " (Tie-break)" : ""}
-                    </div>
-                    <div className="chip chip--muted" title="Set necessari per vincere">
-                        Vince a {setsToWin}
+                    <div className="appSubTitle">
+                        {formatStatusLabel(match.status)} · Obiettivo {pointsTarget}
+                        {isTiebreak ? " (tie-break)" : ""}
                     </div>
                 </div>
 
                 <div className="topBar__right">
                     {boardOpen ? (
-                        <button className="btn btn--ghost" onClick={() => void closeBoard()}>
-                            Chiudi tabellone
-                        </button>
+                        <>
+                            <span className="liveBadge" role="status">
+                                Tabellone aperto
+                            </span>
+                            <button className="btn btn--ghost" onClick={() => void closeBoard()}>
+                                Chiudi tabellone
+                            </button>
+                        </>
                     ) : (
                         <button
-                            className="btn btn--ghost"
+                            className="btn btn--primary"
                             onClick={() => {
                                 setBoardOpen(true);
                                 void openBoard(() => setBoardOpen(false));
@@ -253,15 +252,6 @@ export function ScoreboardPage() {
                             Apri tabellone
                         </button>
                     )}
-                    <button
-                        className="btn btn--ghost btn--icon"
-                        disabled={match.status !== "finished" || isExporting}
-                        onClick={() => void exportCsvReport()}
-                        aria-label="Esporta report CSV"
-                        title={match.status === "finished" ? "Esporta report CSV" : "Esporta report CSV (disponibile a fine partita)"}
-                    >
-                        <ExportIcon size={30} />
-                    </button>
                     <button className="btn btn--ghost" onClick={() => setSettingsOpen(true)}>
                         Impostazioni
                     </button>
@@ -287,109 +277,57 @@ export function ScoreboardPage() {
                 </div>
             </header>
 
-            <section className="setRow" aria-label="Set">
-                <SetIndicator label={match.home.name} color="home" rules={match.rules} setsWon={match.home.setsWon} currentSet={match.currentSet} />
-                <div className="setRow__center">
-                    <div className="setRow__big">
-                        {match.home.setsWon} - {match.away.setsWon}
-                    </div>
-                    <div className="setRow__small">Set vinti</div>
+            <main className="preview" aria-label="Anteprima del tabellone">
+                <div className="preview__frame">
+                    <Scoreboard match={match} />
                 </div>
-                <SetIndicator label={match.away.name} color="away" rules={match.rules} setsWon={match.away.setsWon} currentSet={match.currentSet} />
-            </section>
-
-            <main className="scoreGrid">
-                <TeamPanel side="home" team={match.home} />
-
-                <section className="centerPanel" aria-label="Info set">
-                    <div className="centerPanel__title">
-                        Set {match.currentSet}
-                        {isTiebreak ? " (Tie-break)" : ""}
-                    </div>
-                    <div className="centerPanel__subtitle">
-                        Punti per vincere: {pointsTarget}
-                        {match.rules.winByTwo ? ", vantaggio di 2" : ""}
-                    </div>
-
-                    <div className="centerPanel__actions">
-                        <button className="btn btn--primary" onClick={() => dispatch({ type: "undo" })}>
-                            Annulla
-                        </button>
-                        <button
-                            className="btn btn--ghost"
-                            onClick={() => void confirmAndDispatch({ type: "set.reset_current" }, "Vuoi azzerare il set corrente?")}
-                        >
-                            Azzeramento set
-                        </button>
-                    </div>
-
-                    {match.status === "finished" ? (
-                        <div className="winnerBanner" role="status">
-                            {match.home.setsWon > match.away.setsWon ? `Ha vinto ${match.home.name}` : `Ha vinto ${match.away.name}`}
-                        </div>
-                    ) : null}
-
-                    {match.status !== "finished" ? (
-                        <div className="manualSet">
-                            <div className="manualSet__label">Assegna set (manuale)</div>
-                            <div className="manualSet__buttons">
-                                <button className="btn btn--ghost" onClick={() => awardSetTo("home")} title={`Set ${match.home.name}`}>
-                                    Set {match.home.name}
-                                </button>
-                                <button className="btn btn--ghost" onClick={() => awardSetTo("away")} title={`Set ${match.away.name}`}>
-                                    Set {match.away.name}
-                                </button>
-                            </div>
-                        </div>
-                    ) : null}
-
-                    <div className="hintBox">
-                        <div className="hintBox__title">Scorciatoie</div>
-                        <div className="hintBox__body">
-                            Q/A: +/− Casa • P/L: +/− Ospite • W/O: timeout • 1/2: servizio • U: annulla
-                        </div>
-                    </div>
-                </section>
-
-                <TeamPanel side="away" team={match.away} />
             </main>
 
             <section className="controls" aria-label="Controlli punti">
-                <div className="controls__col controls__col--home">
-                    <div className="controls__title">{match.home.name}</div>
-                    <div className="controls__buttons">
-                        <button className="btn btn--primary" onClick={() => dispatch({ type: "point.increment", team: "home" })}>
-                            +1
-                        </button>
-                        <button className="btn btn--ghost" onClick={() => dispatch({ type: "point.decrement", team: "home" })}>
-                            −1
-                        </button>
-                        <button className="btn btn--ghost" onClick={() => dispatch({ type: "timeout.take", team: "home" })}>
-                            Timeout
-                        </button>
-                        <button className="btn btn--ghost" onClick={() => dispatch({ type: "serving.set", team: "home" })}>
-                            Servizio
-                        </button>
-                    </div>
+                {teamControls("home", { plus: "Q", minus: "A", timeout: "W", serve: "1" })}
+
+                <div className="controls__center">
+                    <button className="btn btn--primary" onClick={() => dispatch({ type: "undo" })}>
+                        Annulla (U)
+                    </button>
+                    <details className="moreMenu">
+                        <summary className="btn btn--ghost">Altre azioni…</summary>
+                        <div className="moreMenu__list">
+                            <button
+                                className="btn btn--ghost"
+                                onClick={(e) => {
+                                    closeMenu(e);
+                                    void confirmAndDispatch({ type: "set.reset_current" }, "Vuoi azzerare il set corrente?");
+                                }}
+                            >
+                                Azzera set
+                            </button>
+                            {match.status !== "finished" ? (
+                                <>
+                                    <button className="btn btn--ghost" title={`Assegna set a ${match.home.name}`} onClick={(e) => (closeMenu(e), awardSetTo("home"))}>
+                                        Assegna set a {match.home.name}
+                                    </button>
+                                    <button className="btn btn--ghost" title={`Assegna set a ${match.away.name}`} onClick={(e) => (closeMenu(e), awardSetTo("away"))}>
+                                        Assegna set a {match.away.name}
+                                    </button>
+                                </>
+                            ) : null}
+                            <button
+                                className="btn btn--ghost"
+                                disabled={match.status !== "finished" || isExporting}
+                                title={match.status === "finished" ? "Esporta report CSV" : "Esporta report CSV (disponibile a fine partita)"}
+                                onClick={(e) => {
+                                    closeMenu(e);
+                                    void exportCsvReport();
+                                }}
+                            >
+                                Esporta report CSV
+                            </button>
+                        </div>
+                    </details>
                 </div>
 
-                <div className="controls__col controls__col--away">
-                    <div className="controls__title">{match.away.name}</div>
-                    <div className="controls__buttons">
-                        <button className="btn btn--primary" onClick={() => dispatch({ type: "point.increment", team: "away" })}>
-                            +1
-                        </button>
-                        <button className="btn btn--ghost" onClick={() => dispatch({ type: "point.decrement", team: "away" })}>
-                            −1
-                        </button>
-                        <button className="btn btn--ghost" onClick={() => dispatch({ type: "timeout.take", team: "away" })}>
-                            Timeout
-                        </button>
-                        <button className="btn btn--ghost" onClick={() => dispatch({ type: "serving.set", team: "away" })}>
-                            Servizio
-                        </button>
-                    </div>
-                </div>
+                {teamControls("away", { plus: "P", minus: "L", timeout: "O", serve: "2" })}
             </section>
 
             {settingsOpen && (
