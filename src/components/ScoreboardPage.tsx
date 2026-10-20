@@ -10,6 +10,8 @@ import { confirm, message, save } from "@tauri-apps/plugin-dialog";
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { buildMatchReportCsv } from "../utils/matchReportCsv";
 import { shortcutAction } from "../state/shortcuts";
+import { onAction, onMatchRequest, publishMatch } from "../board/channel";
+import { closeBoard, openBoard } from "../board/boardWindow";
 
 function isEditableTarget(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) return false;
@@ -30,6 +32,7 @@ export function ScoreboardPage() {
 
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    const [boardOpen, setBoardOpen] = useState(false);
 
     const pointsTarget = useMemo(() => getPointsTargetForSet(match.rules, match.currentSet), [match.currentSet, match.rules]);
 
@@ -38,6 +41,22 @@ export function ScoreboardPage() {
     const allowCloseRef = useRef(false);
 
     const isTiebreak = match.currentSet >= match.rules.bestOf;
+
+    // The scorer is the single source of truth: publish every change at once, answer the board's requests, apply its forwarded keys.
+    const matchRef = useRef(match);
+    useEffect(() => {
+        matchRef.current = match;
+        publishMatch(match);
+    }, [match]);
+
+    useEffect(() => {
+        const stopRequests = onMatchRequest(() => publishMatch(matchRef.current));
+        const stopActions = onAction(dispatch);
+        return () => {
+            stopRequests();
+            stopActions();
+        };
+    }, []);
 
     useEffect(() => {
         const handle = window.setTimeout(() => {
@@ -91,6 +110,7 @@ export function ScoreboardPage() {
                 allowCloseRef.current = true;
                 if (unlisten) unlisten();
 
+                await closeBoard();
                 await appWindow.close();
             });
         })();
@@ -218,6 +238,21 @@ export function ScoreboardPage() {
                 </div>
 
                 <div className="topBar__right">
+                    {boardOpen ? (
+                        <button className="btn btn--ghost" onClick={() => void closeBoard()}>
+                            Chiudi tabellone
+                        </button>
+                    ) : (
+                        <button
+                            className="btn btn--ghost"
+                            onClick={() => {
+                                setBoardOpen(true);
+                                void openBoard(() => setBoardOpen(false));
+                            }}
+                        >
+                            Apri tabellone
+                        </button>
+                    )}
                     <button
                         className="btn btn--ghost btn--icon"
                         disabled={match.status !== "finished" || isExporting}

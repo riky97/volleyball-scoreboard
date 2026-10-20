@@ -13,6 +13,8 @@ pub fn run() {
       Ok(())
     })
     .plugin(tauri_plugin_dialog::init())
+    // Remembers the board window's position, size and fullscreen; the scorer window keeps its maximized default.
+    .plugin(tauri_plugin_window_state::Builder::default().with_denylist(&["main"]).build())
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

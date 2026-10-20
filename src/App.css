@@ -641,3 +641,20 @@ select {
 .board__setsDash {
     color: var(--border-strong);
 }
+
+/* Public board window: the board fills the window, no cursor over the TV. */
+.boardWindow {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    cursor: none;
+    background: var(--app-bg);
+}
+
+.boardWindow__waiting {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    font-size: 4vh;
+    color: var(--muted);
+}
