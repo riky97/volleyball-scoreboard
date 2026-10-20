@@ -8,15 +8,9 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { confirm, message, save } from "@tauri-apps/plugin-dialog";
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { buildMatchReportCsv } from "../utils/matchReportCsv";
-import { shortcutAction } from "../state/shortcuts";
+import { isEditableTarget, shortcutAction } from "../state/shortcuts";
 import { onAction, onMatchRequest, publishMatch } from "../board/channel";
 import { closeBoard, openBoard } from "../board/boardWindow";
-
-function isEditableTarget(target: EventTarget | null): boolean {
-    if (!(target instanceof HTMLElement)) return false;
-    const tag = target.tagName.toLowerCase();
-    return tag === "input" || tag === "textarea" || target.isContentEditable;
-}
 
 function formatStatusLabel(status: "in_progress" | "finished"): string {
     return status === "finished" ? "Partita terminata" : "Partita in corso";

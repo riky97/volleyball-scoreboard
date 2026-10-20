@@ -21,9 +21,8 @@ export function BoardWindow() {
     const [match, setMatch] = useState(loadMatchState);
 
     useEffect(() => {
-        const stop = onMatch(setMatch);
-        requestMatch();
-        return stop;
+        // Ask for the current state only once we can hear the answer.
+        return onMatch(setMatch, requestMatch);
     }, []);
 
     useEffect(() => {

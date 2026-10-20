@@ -20,20 +20,23 @@ function post(type: string, payload?: unknown): void {
     outbox.postMessage({ type, payload });
 }
 
-function subscribe<T>(type: string, cb: (payload: T) => void): () => void {
+// onReady fires once the listener is registered (Tauri registers asynchronously).
+function subscribe<T>(type: string, cb: (payload: T) => void, onReady?: () => void): () => void {
     if (isTauri()) {
         const unlisten = listen<T>(type, (event) => cb(event.payload));
+        if (onReady) void unlisten.then(onReady);
         return () => void unlisten.then((stop) => stop());
     }
     const inbox = new BroadcastChannel(CHANNEL);
     inbox.onmessage = (event: MessageEvent<{ type: string; payload: T }>) => {
         if (event.data.type === type) cb(event.data.payload);
     };
+    onReady?.();
     return () => inbox.close();
 }
 
 export const publishMatch = (state: MatchState): void => post(MATCH, state);
-export const onMatch = (cb: (state: MatchState) => void): (() => void) => subscribe(MATCH, cb);
+export const onMatch = (cb: (state: MatchState) => void, onReady?: () => void): (() => void) => subscribe(MATCH, cb, onReady);
 export const requestMatch = (): void => post(HELLO);
 export const onMatchRequest = (cb: () => void): (() => void) => subscribe(HELLO, () => cb());
 export const sendAction = (action: MatchAction): void => post(ACTION, action);

@@ -14,6 +14,14 @@ const SHORTCUTS: Record<string, MatchAction> = {
     u: { type: "undo" },
 };
 
+/** Keys typed in form fields (including selects) are text, never match actions. */
+export function isEditableTarget(target: EventTarget | null): boolean {
+    if (!target || !("tagName" in target)) return false;
+    const el = target as HTMLElement;
+    const tag = el.tagName.toLowerCase();
+    return tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable === true;
+}
+
 export function shortcutAction(e: ShortcutKey): MatchAction | null {
     if (e.ctrlKey || e.altKey || e.metaKey) return null;
     return SHORTCUTS[e.key.toLowerCase()] ?? null;

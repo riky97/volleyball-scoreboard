@@ -11,11 +11,14 @@ export async function openBoard(onClosed: () => void): Promise<void> {
     if (isTauri()) {
         const existing = await WebviewWindow.getByLabel(BOARD_LABEL);
         if (existing) {
+            // Also after a scorer reload, when the earlier listener is gone.
+            void existing.once("tauri://destroyed", onClosed);
             await existing.setFocus();
             return;
         }
         const board = new WebviewWindow(BOARD_LABEL, { url: BOARD_URL, title: "Tabellone", width: 1280, height: 720 });
         void board.once("tauri://destroyed", onClosed);
+        void board.once("tauri://error", onClosed);
         return;
     }
 
@@ -39,8 +42,13 @@ export async function openBoard(onClosed: () => void): Promise<void> {
 
 export async function closeBoard(): Promise<void> {
     if (isTauri()) {
-        const board = await WebviewWindow.getByLabel(BOARD_LABEL);
-        await board?.close();
+        // Never throw: closing the app must go on even if the board is already gone.
+        try {
+            const board = await WebviewWindow.getByLabel(BOARD_LABEL);
+            await board?.close();
+        } catch {
+            // nothing left to close
+        }
         return;
     }
     browserBoard?.close();

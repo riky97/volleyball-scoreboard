@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { shortcutAction } from "./shortcuts";
+import { isEditableTarget, shortcutAction } from "./shortcuts";
 
 describe("shortcutAction", () => {
     it("maps the scorer keys to match actions, case-insensitively", () => {
@@ -18,5 +18,15 @@ describe("shortcutAction", () => {
 
     it("ignores keys without a shortcut", () => {
         expect(shortcutAction({ key: "x" })).toBeNull();
+    });
+});
+
+describe("isEditableTarget", () => {
+    it("treats text fields and selects as editable, so their keys never score", () => {
+        expect(isEditableTarget({ tagName: "INPUT" } as unknown as EventTarget)).toBe(true);
+        expect(isEditableTarget({ tagName: "SELECT" } as unknown as EventTarget)).toBe(true);
+        expect(isEditableTarget({ tagName: "TEXTAREA" } as unknown as EventTarget)).toBe(true);
+        expect(isEditableTarget({ tagName: "BUTTON" } as unknown as EventTarget)).toBe(false);
+        expect(isEditableTarget(null)).toBe(false);
     });
 });
