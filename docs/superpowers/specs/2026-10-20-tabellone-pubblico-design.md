@@ -16,6 +16,7 @@ Oggi l'app ha una sola finestra che mescola punteggio e controlli: sul monitor g
 1. Un pulsante **"Apri tabellone"** nella finestra del segnapunti apre una **nuova finestra** con il solo tabellone. L'utente la trascina sul monitor grande.
 2. Nella finestra del tabellone: **F11 o doppio clic** = schermo intero senza bordi (e ritorno).
 3. La finestra del tabellone **si riapre dove era stata lasciata** (posizione, dimensione e schermo intero) la volta successiva.
+   All'avvio successivo dell'app il tabellone **non** si apre da solo: si ricordano solo posizione, dimensione e schermo intero, e si riapre con "Apri tabellone".
 4. **"Chiudi tabellone"** la chiude; lo stato "Tabellone aperto" (pallino verde) / pulsante "Apri tabellone" nella barra del segnapunti riflette sempre la realtà, anche se la finestra viene chiusa dalla sua X.
 5. Il tabellone si aggiorna **nello stesso istante** in cui il segnapunti agisce (tasto o clic).
 6. **Tema scuro su tutta l'app** (segnapunti e tabellone), fondo `#0B1120`.
@@ -42,6 +43,7 @@ Contenuto, tutto su fondo `#0B1120`:
 
 - **Riga in alto**: a sinistra nome Casa con barra verticale **blu**, a destra nome Ospite con barra **arancione**; al centro **"SET n"** (con "Tie-break" quando è il set decisivo).
 - **Servizio**: icona pallone **gialla** accanto al nome della squadra che serve.
+- **Timeout rimasti**: sotto il nome di ogni squadra, es. "Timeout 1", ben leggibile ma secondario rispetto a nome e punti. Chiamare un timeout non mostra nient'altro (solo il numero che scende). Essendo l'anteprima lo stesso componente, i timeout compaiono anche sul PC.
 - **Centro**: i due punteggi enormi (peso 900, cifre tabulari) a sinistra e a destra; tra i due, **"SET VINTI"** con i set vinti grandi, colorati blu e arancione.
 - **Fine partita**: il tabellone mostra il **risultato finale e il vincitore** (es. "Ha vinto Casa", set vinti 3–1) al posto della normale indicazione del set; i punti dell'ultimo set restano visibili (comportamento già presente nel reducer).
 - **Nomi lunghi**: al massimo una riga per nome sul tabellone, con ellissi; non devono mai spingere o rimpicciolire i punteggi.
@@ -50,7 +52,7 @@ Contenuto, tutto su fondo `#0B1120`:
 ## Finestra del segnapunti (bozza PC 2)
 
 - **Barra in alto**: titolo app; stato tabellone ("● Tabellone aperto" verde **oppure** pulsante "Apri tabellone"); "Chiudi tabellone" (solo se aperto); "Impostazioni"; "Nuova partita" (rosso, con conferma come oggi).
-- **Centro**: l'**anteprima** = lo stesso componente del tabellone pubblico, renderizzato più piccolo dentro un riquadro con bordo sottile. Deve essere identica per contenuto e disposizione; è ciò che garantisce al segnapunti cosa vede il pubblico.
+- **Centro**: l'**anteprima** = lo stesso componente del tabellone pubblico, renderizzato più piccolo dentro un riquadro con bordo sottile. Deve essere identica per contenuto e disposizione; è ciò che garantisce al segnapunti cosa vede il pubblico. Il riquadro ha proporzioni fisse **16:9** (quelle dei TV); se il monitor reale ha proporzioni diverse, piccole differenze di spaziatura sono accettate.
 - **In basso**, tre gruppi:
   - Casa (sinistra): **+1** grande primario, **−1**, **Timeout · n rimasti**, **Servizio**.
   - Centro: **Annulla (U)** primario e **"Altre azioni…"**.
@@ -59,6 +61,13 @@ Contenuto, tutto su fondo `#0B1120`:
 - Restano **tutte le scorciatoie da tastiera** attuali (Q/A, P/L, W/O, 1/2, U); le etichette dei pulsanti mostrano il tasto.
 - La finestra delle **Impostazioni** resta com'è (passa solo al tema scuro).
 - Deve stare in una schermata senza scroll dal 1366×768 in su.
+
+## Comportamento tra le due finestre
+
+- **Tasti premuti col tabellone in primo piano**: per trascinarlo o metterlo a schermo intero il segnapunti deve cliccarci sopra, e da lì in poi i tasti andrebbero al tabellone. Siccome chi segna non vede il monitor, un punto perso non verrebbe notato. Quindi la finestra del tabellone **inoltra le stesse scorciatoie** (Q/A, P/L, W/O, 1/2, U) alla finestra del segnapunti, che le esegue come se fossero premute lì. Il tabellone non modifica mai lo stato da sé: la fonte della verità resta il segnapunti. F11 e doppio clic restano gli unici comandi propri del tabellone.
+- **Chiusura dell'app**: confermare la chiusura della finestra del segnapunti chiude anche il tabellone. Il tabellone non resta mai aperto senza il segnapunti.
+- **Chiusura del solo tabellone** (con la sua X o con "Chiudi tabellone"): la partita prosegue normalmente nel segnapunti, che torna a mostrare "Apri tabellone".
+- **Riapertura**: il tabellone appena aperto mostra subito lo stato attuale della partita, non uno stato vuoto.
 
 ## Vincoli
 
@@ -83,7 +92,7 @@ Contenuto, tutto su fondo `#0B1120`:
   | Stato attivo | verde `#4ADE80` |
   | Pericolo | rosso `rgba(239, 68, 68, …)` |
 
-  Il blu resta anche il colore delle azioni primarie (+1, Annulla), come oggi. Contrasti da verificare con i valori finali (testo ≥ 4.5:1).
+  Il blu resta anche il colore delle azioni primarie (+1, Annulla), come oggi. Contrasti da verificare con i valori finali (testo ≥ 4.5:1): il testo bianco su `#3B82F6` è circa 3.7:1, quindi per i pulsanti primari va usato un blu più scuro (es. `#2563EB`), tenendo `#3B82F6` per barre e numeri di Casa.
 - **`DESIGN.md` va aggiornato** al tema scuro: palette sopra, arancione al posto del rosso per Ospite, giallo per il servizio, nuovo componente "tabellone pubblico", regola "solo variabili CSS". La metafora "Il Tabellone di Palestra" resta.
 - Aggiornare `CLAUDE.md` (architettura) con la nuova finestra.
 
@@ -101,3 +110,7 @@ Contenuto, tutto su fondo `#0B1120`:
 - Arancione invece di rosso per Ospite (si distingue dal blu anche per chi non vede bene i colori).
 - F11 / doppio clic per lo schermo intero e memoria della posizione: proposti da me, accettati.
 - Le azioni rare spostate in "Altre azioni…".
+- Il tabellone inoltra le scorciatoie al segnapunti (per non perdere punti quando ha il focus).
+- Chiudere l'app chiude anche il tabellone; all'avvio il tabellone non si riapre da solo.
+- Anteprima a 16:9 fisso.
+- Blu più scuro per il testo dei pulsanti primari, per il contrasto.
